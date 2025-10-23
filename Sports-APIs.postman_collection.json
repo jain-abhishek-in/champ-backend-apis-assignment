@@ -1,0 +1,120 @@
+{
+  "info": {
+    "name": "Sports APIs Collection",
+    "description": "Collection for testing Soccer, Tennis, and Hockey APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Soccer API",
+      "item": [
+        {
+          "name": "Get All Matches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/matches",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "matches"]
+            },
+            "description": "Get all soccer matches"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Match by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3001/api/matches/M1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3001",
+              "path": ["api", "matches", "M1"]
+            },
+            "description": "Get a specific soccer match by ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Tennis API",
+      "item": [
+        {
+          "name": "Get All Games",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/api/games",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["api", "games"]
+            },
+            "description": "Get all tennis games"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Game by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3002/api/games/T1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3002",
+              "path": ["api", "games", "T1"]
+            },
+            "description": "Get a specific tennis game by ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Hockey API",
+      "item": [
+        {
+          "name": "Get All Games",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3003/api/games",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3003",
+              "path": ["api", "games"]
+            },
+            "description": "Get all hockey games"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Game by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:3003/api/games/H1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "3003",
+              "path": ["api", "games", "H1"]
+            },
+            "description": "Get a specific hockey game by ID"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
