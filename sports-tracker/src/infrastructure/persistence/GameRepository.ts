@@ -27,12 +27,12 @@ export class GameRepository {
         }
       ).exec();
 
-      console.log(`✅ Game saved: ${game.getGameId()} (${game.getSport()})`);
+      console.log(`Game saved: ${game.getGameId()} (${game.getSport()})`);
       
       return savedGame as IGameDocument;
 
     } catch (error) {
-      console.error('❌ Error saving game:', error);
+      console.error('Error saving game:', error);
       throw error;
     }
   }
@@ -97,12 +97,12 @@ export class GameRepository {
 
   async delete(gameId: string): Promise<void> {
     await GameModel.deleteOne({ gameId }).exec();
-    console.log(`🗑️ Game deleted: ${gameId}`);
+    console.log(`Game deleted: ${gameId}`);
   }
 
   async deleteAll(): Promise<void> {
     await GameModel.deleteMany({}).exec();
-    console.log('🗑️ All games deleted');
+    console.log('All games deleted');
   }
 
   async count(): Promise<number> {

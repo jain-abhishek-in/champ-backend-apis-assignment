@@ -7,7 +7,7 @@ export interface GameResponseDto {
   score2: number;
   status: string;
   currentTime: string;
-  lastUpdated: string;  // ISO string format
+  lastUpdated: string;
 }
 
 export interface EventResponseDto {
@@ -15,7 +15,7 @@ export interface EventResponseDto {
   eventType: string;
   gameId: string;
   version: number;
-  timestamp: string;  // ISO string format
+  timestamp: string;
   payload: any;
 }
 

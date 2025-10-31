@@ -45,7 +45,7 @@ export class HockeyAdapter implements ISportAdapter {
       return games;
 
     } catch (error) {
-      console.error('❌ Error fetching hockey games:', error);
+      console.error('Error fetching hockey games:', error);
       return [];
     }
   }

@@ -9,19 +9,19 @@ export async function connectDatabase(): Promise<void> {
     
     await mongoose.connect(mongoUri);
     
-    console.log('✅ Connected to MongoDB');
+    console.log('Connected to MongoDB');
     
     if (mongoose.connection.db) {
-      console.log(`📦 Database: ${mongoose.connection.db.databaseName}`);
+      console.log(`Database: ${mongoose.connection.db.databaseName}`);
     }
     
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error);
+    console.error('MongoDB connection error:', error);
     process.exit(1);
   }
 }
 
 export async function disconnectDatabase(): Promise<void> {
   await mongoose.disconnect();
-  console.log('👋 Disconnected from MongoDB');
+  console.log('Disconnected from MongoDB');
 }

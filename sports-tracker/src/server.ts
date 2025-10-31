@@ -28,14 +28,9 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
-/**
- * INITIALIZE THE APPLICATION
- */
 async function initializeApp() {
-  // Step 1: Connect to database
   await connectDatabase();
 
-  // Step 2: Create adapters (one for each sport)
   const soccerAdapter = new SoccerAdapter(
     process.env.SOCCER_API_URL || 'http://localhost:3001'
   );
@@ -48,11 +43,9 @@ async function initializeApp() {
 
   const adapters = [soccerAdapter, tennisAdapter, hockeyAdapter];
 
-  // Step 3: Create repositories
   const eventStore = new EventStore();
   const gameRepository = new GameRepository();
 
-  // Step 4: Create sync service
   const pollInterval = parseInt(process.env.POLL_INTERVAL || '5000');
   const syncService = new GameSyncService(
     adapters,
@@ -61,7 +54,6 @@ async function initializeApp() {
     pollInterval
   );
 
-  // Step 5: Start polling
   await syncService.startPolling();
 
   console.log('✅ Application initialized successfully!');
@@ -70,19 +62,13 @@ async function initializeApp() {
   return { syncService, gameRepository, eventStore };
 }
 
-/**
- * START SERVER
- */
 async function start() {
   try {
-    // Initialize app (connect DB, start polling)
     const { syncService, gameRepository, eventStore } = await initializeApp();
 
-    // Mount routes
     app.use('/api/games', createGameRoutes(gameRepository, eventStore));
     app.use('/api/stats', createStatsRoutes(gameRepository, eventStore));
 
-    // Health check
     app.get('/health', (req, res) => {
       res.json({
         status: 'ok',
@@ -91,7 +77,6 @@ async function start() {
       });
     });
 
-    // Root endpoint
     app.get('/', (req, res) => {
       res.json({
         name: 'Sports Tracker API',
@@ -122,38 +107,38 @@ async function start() {
     // Start Express server
     app.listen(PORT, () => {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`🚀 Sports Tracker API`);
+      console.log(`Sports Tracker API`);
       console.log(`${'='.repeat(60)}`);
-      console.log(`\n📡 Server: http://localhost:${PORT}`);
-      console.log(`\n📚 API Endpoints:`);
-      console.log(`   GET  /                          - API documentation`);
-      console.log(`   GET  /health                    - Health check`);
-      console.log(`   GET  /api/games                 - All games`);
-      console.log(`   GET  /api/games/live            - Live games only`);
-      console.log(`   GET  /api/games/sport/:sport    - Games by sport`);
-      console.log(`   GET  /api/games/:id             - Single game`);
-      console.log(`   GET  /api/games/:id/events      - Game history`);
-      console.log(`   GET  /api/stats                 - Statistics`);
-      console.log(`\n📊 Data Sources:`);
-      console.log(`   ⚽ Soccer: ${process.env.SOCCER_API_URL}`);
-      console.log(`   🎾 Tennis: ${process.env.TENNIS_API_URL}`);
-      console.log(`   🏒 Hockey: ${process.env.HOCKEY_API_URL}`);
-      console.log(`\n💾 Database:`);
-      console.log(`   📚 Events collection (event sourcing)`);
-      console.log(`   📊 Games collection (current state)`);
+      console.log(`\nServer: http://localhost:${PORT}`);
+      console.log(`\nAPI Endpoints:`);
+      console.log(`GET  /                          - API documentation`);
+      console.log(`GET  /health                    - Health check`);
+      console.log(`GET  /api/games                 - All games`);
+      console.log(`GET  /api/games/live            - Live games only`);
+      console.log(`GET  /api/games/sport/:sport    - Games by sport`);
+      console.log(`GET  /api/games/:id             - Single game`);
+      console.log(`GET  /api/games/:id/events      - Game history`);
+      console.log(`GET  /api/stats                 - Statistics`);
+      console.log(`\nData Sources:`);
+      console.log(`Soccer: ${process.env.SOCCER_API_URL}`);
+      console.log(`Tennis: ${process.env.TENNIS_API_URL}`);
+      console.log(`Hockey: ${process.env.HOCKEY_API_URL}`);
+      console.log(`\nDatabase:`);
+      console.log(`Events collection (event sourcing)`);
+      console.log(`Games collection (current state)`);
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`⏹️  Press Ctrl+C to stop\n`);
+      console.log(`Press Ctrl+C to stop\n`);
     });
 
     // Graceful shutdown
     process.on('SIGINT', async () => {
-      console.log('\n⏹️  Shutting down gracefully...');
+      console.log('\nShutting down gracefully...');
       syncService.stopPolling();
       process.exit(0);
     });
 
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error('Failed to start server:', error);
     process.exit(1);
   }
 }

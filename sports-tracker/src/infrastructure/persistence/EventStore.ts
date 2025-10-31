@@ -29,12 +29,12 @@ export class EventStore {
 
       const savedEvent = await event.save();
       
-      console.log(`✅ Event saved: ${eventData.eventType} for ${eventData.aggregateId} (v${nextVersion})`);
+      console.log(`Event saved: ${eventData.eventType} for ${eventData.aggregateId} (v${nextVersion})`);
       
       return savedEvent;
 
     } catch (error) {
-      console.error('❌ Error saving event:', error);
+      console.error('Error saving event:', error);
       throw error;
     }
   }

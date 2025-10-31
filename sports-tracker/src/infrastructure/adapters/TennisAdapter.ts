@@ -44,7 +44,7 @@ export class TennisAdapter implements ISportAdapter {
       return games;
 
     } catch (error) {
-      console.error('❌ Error fetching tennis games:', error);
+      console.error('Error fetching tennis games:', error);
       return [];
     }
   }

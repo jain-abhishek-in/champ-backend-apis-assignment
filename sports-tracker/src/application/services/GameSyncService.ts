@@ -25,12 +25,12 @@ export class GameSyncService {
 
   async startPolling(): Promise<void> {
     if (this.isRunning) {
-      console.log('⚠️  Polling already running');
+      console.log('Polling already running');
       return;
     }
 
     this.isRunning = true;
-    console.log(`🔄 Starting polling every ${this.pollingInterval / 1000} seconds...`);
+    console.log(`Starting polling every ${this.pollingInterval / 1000} seconds...`);
 
     await this.syncAllSports();
 
@@ -45,21 +45,21 @@ export class GameSyncService {
       this.intervalId = undefined;
     }
     this.isRunning = false;
-    console.log('⏹️  Polling stopped');
+    console.log('Polling stopped');
   }
 
   async syncAllSports(): Promise<void> {
-    console.log('\n🔄 === Sync cycle started ===');
+    console.log('\n === Sync cycle started ===');
     
     for (const adapter of this.adapters) {
       try {
         await this.syncSport(adapter);
       } catch (error) {
-        console.error(`❌ Error syncing ${adapter.getSportType()}:`, error);
+        console.error(`Error syncing ${adapter.getSportType()}:`, error);
       }
     }
     
-    console.log('✅ === Sync cycle completed ===\n');
+    console.log(' === Sync cycle completed ===\n');
   }
 
   private async syncSport(adapter: ISportAdapter): Promise<void> {
@@ -68,14 +68,14 @@ export class GameSyncService {
     try {
       const games = await adapter.fetchGames();
       
-      console.log(`📊 ${sportType}: Fetched ${games.length} games`);
+      console.log(`${sportType}: Fetched ${games.length} games`);
 
       for (const game of games) {
         await this.processGame(game, sportType);
       }
 
     } catch (error) {
-      console.error(`❌ Error syncing ${sportType}:`, error);
+      console.error(`Error syncing ${sportType}:`, error);
       throw error;
     }
   }
@@ -93,14 +93,14 @@ export class GameSyncService {
       }
 
     } catch (error) {
-      console.error(`❌ Error processing game ${gameId}:`, error);
+      console.error(`Error processing game ${gameId}:`, error);
     }
   }
 
   private async handleNewGame(game: Game, sportType: string): Promise<void> {
     const gameId = game.getGameId();
     
-    console.log(`🆕 New game detected: ${gameId} (${sportType})`);
+    console.log(`New game detected: ${gameId} (${sportType})`);
 
     await this.eventStore.saveEvent({
       eventType: 'GAME_CREATED',
@@ -161,7 +161,7 @@ export class GameSyncService {
     const oldStatus = existingGame.status;
 
     if (newStatus !== oldStatus) {
-      console.log(`📝 ${gameId}: Status changed ${oldStatus} → ${newStatus}`);
+      console.log(`${gameId}: Status changed ${oldStatus} → ${newStatus}`);
       
       await this.eventStore.saveEvent({
         eventType: 'STATUS_CHANGED',
@@ -184,7 +184,7 @@ export class GameSyncService {
     const oldScore2 = existingGame.score2;
 
     if (newScore1 !== oldScore1 || newScore2 !== oldScore2) {
-      console.log(`⚽ ${gameId}: Score changed ${oldScore1}-${oldScore2} → ${newScore1}-${newScore2}`);
+      console.log(`${gameId}: Score changed ${oldScore1}-${oldScore2} → ${newScore1}-${newScore2}`);
       
       await this.eventStore.saveEvent({
         eventType: 'SCORE_UPDATED',
@@ -233,7 +233,7 @@ export class GameSyncService {
     const totalGames = await this.gameRepository.count();
     const byStatus = await this.gameRepository.countByStatus();
     
-    // Count events (approximate - we'd need to query all games)
+    // Count events (approximate need to query all games)
     const allGames = await this.gameRepository.findAll();
     let totalEvents = 0;
     for (const game of allGames) {
@@ -249,7 +249,7 @@ export class GameSyncService {
   }
 
   async syncOnce(): Promise<void> {
-    console.log('🔄 Manual sync triggered');
+    console.log('Manual sync triggered');
     await this.syncAllSports();
   }
 }

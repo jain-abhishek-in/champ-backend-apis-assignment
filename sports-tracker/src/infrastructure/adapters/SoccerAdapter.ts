@@ -46,7 +46,7 @@ export class SoccerAdapter implements ISportAdapter {
       return games;
 
     } catch (error) {
-      console.error('❌ Error fetching soccer games:', error);
+      console.error('Error fetching soccer games:', error);
       return [];
     }
   }
