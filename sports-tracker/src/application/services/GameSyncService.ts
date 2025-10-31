@@ -3,16 +3,6 @@ import { EventStore } from '../../infrastructure/persistence/EventStore';
 import { GameRepository } from '../../infrastructure/persistence/GameRepository';
 import { Game } from '../../domain/entities/Game';
 
-/**
- * GAME SYNC SERVICE
- * 
- * Purpose: Coordinate polling, change detection, and persistence
- * Pattern: Application Service (orchestrates domain and infrastructure)
- * Principle: Single Responsibility (only handles game synchronization)
- * 
- * This is the "brain" that makes everything work together!
- */
-
 export class GameSyncService {
   private adapters: ISportAdapter[];
   private eventStore: EventStore;
@@ -25,7 +15,7 @@ export class GameSyncService {
     adapters: ISportAdapter[],
     eventStore: EventStore,
     gameRepository: GameRepository,
-    pollingInterval: number = 5000  // Default: 5 seconds
+    pollingInterval: number = 5000
   ) {
     this.adapters = adapters;
     this.eventStore = eventStore;
@@ -33,10 +23,6 @@ export class GameSyncService {
     this.pollingInterval = pollingInterval;
   }
 
-  /**
-   * Start polling all sport APIs
-   * Runs continuously in the background
-   */
   async startPolling(): Promise<void> {
     if (this.isRunning) {
       console.log('⚠️  Polling already running');
@@ -46,18 +32,13 @@ export class GameSyncService {
     this.isRunning = true;
     console.log(`🔄 Starting polling every ${this.pollingInterval / 1000} seconds...`);
 
-    // Do first sync immediately
     await this.syncAllSports();
 
-    // Then schedule recurring syncs
     this.intervalId = setInterval(async () => {
       await this.syncAllSports();
     }, this.pollingInterval);
   }
 
-  /**
-   * Stop polling
-   */
   stopPolling(): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -67,10 +48,6 @@ export class GameSyncService {
     console.log('⏹️  Polling stopped');
   }
 
-  /**
-   * Sync all sports (one cycle)
-   * This is called every 5 seconds
-   */
   async syncAllSports(): Promise<void> {
     console.log('\n🔄 === Sync cycle started ===');
     
@@ -79,31 +56,20 @@ export class GameSyncService {
         await this.syncSport(adapter);
       } catch (error) {
         console.error(`❌ Error syncing ${adapter.getSportType()}:`, error);
-        // Continue with other sports even if one fails
       }
     }
     
     console.log('✅ === Sync cycle completed ===\n');
   }
 
-  /**
-   * Sync one sport (using its adapter)
-   * 
-   * Steps:
-   * 1. Fetch games from API (via adapter)
-   * 2. For each game, compare with database
-   * 3. If changed, save event + update snapshot
-   */
   private async syncSport(adapter: ISportAdapter): Promise<void> {
     const sportType = adapter.getSportType();
     
     try {
-      // Step 1: Fetch current data from API (already converted to our format!)
       const games = await adapter.fetchGames();
       
       console.log(`📊 ${sportType}: Fetched ${games.length} games`);
 
-      // Step 2: Process each game
       for (const game of games) {
         await this.processGame(game, sportType);
       }
@@ -114,23 +80,15 @@ export class GameSyncService {
     }
   }
 
-  /**
-   * Process a single game
-   * 
-   * Compare with existing data and save if changed
-   */
   private async processGame(game: Game, sportType: string): Promise<void> {
     const gameId = game.getGameId();
 
     try {
-      // Step 1: Get existing game from database (if exists)
       const existingGame = await this.gameRepository.findById(gameId);
 
       if (!existingGame) {
-        // NEW GAME - First time seeing this game
         await this.handleNewGame(game, sportType);
       } else {
-        // EXISTING GAME - Check if anything changed
         await this.handleExistingGame(game, existingGame, sportType);
       }
 
@@ -139,15 +97,11 @@ export class GameSyncService {
     }
   }
 
-  /**
-   * Handle a new game (first time seeing it)
-   */
   private async handleNewGame(game: Game, sportType: string): Promise<void> {
     const gameId = game.getGameId();
     
     console.log(`🆕 New game detected: ${gameId} (${sportType})`);
 
-    // Save event: GAME_CREATED
     await this.eventStore.saveEvent({
       eventType: 'GAME_CREATED',
       aggregateId: gameId,
@@ -161,7 +115,6 @@ export class GameSyncService {
       sourceApi: `${sportType.toLowerCase()}-api`
     });
 
-    // If game already started, save initial state event
     if (game.getStatus().isLive()) {
       await this.eventStore.saveEvent({
         eventType: 'GAME_STARTED',
@@ -175,7 +128,6 @@ export class GameSyncService {
       });
     }
 
-    // If there's a score, save it
     const score = game.getScore();
     if (score.getTeam1Score() > 0 || score.getTeam2Score() > 0) {
       await this.eventStore.saveEvent({
@@ -194,13 +146,9 @@ export class GameSyncService {
       });
     }
 
-    // Save snapshot to GameRepository
     await this.gameRepository.save(game);
   }
 
-  /**
-   * Handle existing game (check for changes)
-   */
   private async handleExistingGame(
     newGame: Game,
     existingGame: any,
@@ -209,7 +157,6 @@ export class GameSyncService {
     const gameId = newGame.getGameId();
     let hasChanges = false;
 
-    // Check 1: Status changed?
     const newStatus = newGame.getStatus().getValue();
     const oldStatus = existingGame.status;
 
@@ -231,7 +178,6 @@ export class GameSyncService {
       hasChanges = true;
     }
 
-    // Check 2: Score changed?
     const newScore1 = newGame.getScore().getTeam1Score();
     const newScore2 = newGame.getScore().getTeam2Score();
     const oldScore1 = existingGame.score1;
@@ -255,13 +201,10 @@ export class GameSyncService {
       hasChanges = true;
     }
 
-    // Check 3: Current time changed? (minute, period, set)
     const newTime = newGame.getCurrentTime();
     const oldTime = existingGame.currentTime;
 
     if (newTime !== oldTime) {
-      // Time changes frequently, so we don't log every change
-      // But we still save event for complete history
       await this.eventStore.saveEvent({
         eventType: 'TIME_UPDATED',
         aggregateId: gameId,
@@ -277,15 +220,11 @@ export class GameSyncService {
       hasChanges = true;
     }
 
-    // If anything changed, update the snapshot
     if (hasChanges) {
       await this.gameRepository.save(newGame);
     }
   }
 
-  /**
-   * Get current statistics
-   */
   async getStats(): Promise<{
     totalGames: number;
     byStatus: { [status: string]: number };
@@ -309,9 +248,6 @@ export class GameSyncService {
     };
   }
 
-  /**
-   * Manual sync (for testing)
-   */
   async syncOnce(): Promise<void> {
     console.log('🔄 Manual sync triggered');
     await this.syncAllSports();

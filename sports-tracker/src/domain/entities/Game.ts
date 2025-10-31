@@ -60,7 +60,6 @@ export class Game {
     this.lastUpdated = new Date();
   }
 
-  // Factory method - create new game
   static create(
     gameId: string,
     sport: SportType,
@@ -74,14 +73,6 @@ export class Game {
     return new Game(gameId, sport, participants);
   }
 
-  // ========================================
-  // BUSINESS LOGIC METHODS
-  // ========================================
-
-  /**
-   * Start the game
-   * Business Rule: Can only start scheduled games
-   */
   start(): void {
     if (!this.status.isScheduled()) {
       throw new Error('Can only start scheduled games');
@@ -90,10 +81,6 @@ export class Game {
     this.lastUpdated = new Date();
   }
 
-  /**
-   * Finish the game
-   * Business Rule: Can only finish live games
-   */
   finish(): void {
     if (!this.status.isLive()) {
       throw new Error('Can only finish live games');
@@ -102,10 +89,6 @@ export class Game {
     this.lastUpdated = new Date();
   }
 
-  /**
-   * Record a score for team 1
-   * Business Rule: Can only score in live games
-   */
   scoreTeam1(): void {
     if (!this.status.canScore()) {
       throw new Error('Cannot score when game is not live');
@@ -114,10 +97,6 @@ export class Game {
     this.lastUpdated = new Date();
   }
 
-  /**
-   * Record a score for team 2
-   * Business Rule: Can only score in live games
-   */
   scoreTeam2(): void {
     if (!this.status.canScore()) {
       throw new Error('Cannot score when game is not live');
@@ -126,33 +105,21 @@ export class Game {
     this.lastUpdated = new Date();
   }
 
-  /**
-   * Update score directly (for syncing from external API)
-   */
   updateScore(team1Score: number, team2Score: number): void {
     this.score = Score.create(team1Score, team2Score);
     this.lastUpdated = new Date();
   }
 
-  /**
-   * Update game status
-   */
   updateStatus(newStatus: GameStatusEnum): void {
     this.status = new GameStatus(newStatus);
     this.lastUpdated = new Date();
   }
 
-  /**
-   * Update current time/period
-   */
   updateCurrentTime(time: string): void {
     this.currentTime = time;
     this.lastUpdated = new Date();
   }
 
-  /**
-   * Add an event
-   */
   addEvent(event: GameEvent): void {
     this.events.push(event);
     this.lastUpdated = new Date();
@@ -171,7 +138,7 @@ export class Game {
   }
 
   getParticipants(): Participant[] {
-    return [...this.participants]; // Return copy (immutability)
+    return [...this.participants];
   }
 
   getTeam1Name(): string {
@@ -195,7 +162,7 @@ export class Game {
   }
 
   getEvents(): GameEvent[] {
-    return [...this.events]; // Return copy
+    return [...this.events];
   }
 
   getLastUpdated(): Date {
@@ -206,9 +173,6 @@ export class Game {
   // UTILITY METHODS
   // ========================================
 
-  /**
-   * Convert to plain object (for database/API)
-   */
   toObject() {
     return {
       gameId: this.gameId,

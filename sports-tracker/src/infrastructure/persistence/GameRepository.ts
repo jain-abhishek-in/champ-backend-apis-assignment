@@ -1,17 +1,7 @@
 import { GameModel, IGameDocument } from './schemas/GameSchema';
 import { Game } from '../../domain/entities/Game';
 
-/**
- * GAME REPOSITORY
- * 
- * Purpose: Save and retrieve game snapshots
- * Pattern: Repository Pattern
- */
-
 export class GameRepository {
-  /**
-   * Save or update a game (Upsert)
-   */
   async save(game: Game): Promise<IGameDocument> {
     try {
       const gameData = {
@@ -27,7 +17,6 @@ export class GameRepository {
         lastUpdated: new Date()
       };
 
-      // Upsert
       const savedGame = await GameModel.findOneAndUpdate(
         { gameId: game.getGameId() },
         { $set: gameData },
@@ -48,17 +37,11 @@ export class GameRepository {
     }
   }
 
-  /**
-   * Find a game by ID
-   */
   async findById(gameId: string): Promise<IGameDocument | null> {
     const game = await GameModel.findOne({ gameId }).exec();
     return game;
   }
 
-  /**
-   * Find all games
-   */
   async findAll(): Promise<any[]> {
     const games = await GameModel
       .find()
@@ -68,9 +51,6 @@ export class GameRepository {
     return games;
   }
 
-  /**
-   * Find games by sport
-   */
   async findBySport(sport: string): Promise<any[]> {
     const games = await GameModel
       .find({ sport })
@@ -80,9 +60,6 @@ export class GameRepository {
     return games;
   }
 
-  /**
-   * Find games by status
-   */
   async findByStatus(status: string): Promise<any[]> {
     const games = await GameModel
       .find({ status })
@@ -92,9 +69,6 @@ export class GameRepository {
     return games;
   }
 
-  /**
-   * Find all live games
-   */
   async findLiveGames(): Promise<any[]> {
     const games = await GameModel
       .find({ status: 'LIVE' })
@@ -104,9 +78,6 @@ export class GameRepository {
     return games;
   }
 
-  /**
-   * Update game version
-   */
   async updateVersion(
     gameId: string,
     version: number,
@@ -124,32 +95,20 @@ export class GameRepository {
     ).exec();
   }
 
-  /**
-   * Delete a game
-   */
   async delete(gameId: string): Promise<void> {
     await GameModel.deleteOne({ gameId }).exec();
     console.log(`🗑️ Game deleted: ${gameId}`);
   }
 
-  /**
-   * Delete all games
-   */
   async deleteAll(): Promise<void> {
     await GameModel.deleteMany({}).exec();
     console.log('🗑️ All games deleted');
   }
 
-  /**
-   * Count total games
-   */
   async count(): Promise<number> {
     return await GameModel.countDocuments().exec();
   }
 
-  /**
-   * Count games by status
-   */
   async countByStatus(): Promise<{ [status: string]: number }> {
     const results = await GameModel.aggregate([
       {

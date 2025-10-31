@@ -1,74 +1,51 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-/**
- * EVENT SCHEMA (Event Sourcing Pattern)
- * 
- * This is our SOURCE OF TRUTH - the complete history
- * 
- * Key principles:
- * 1. APPEND-ONLY: Never update or delete events
- * 2. IMMUTABLE: Once written, never changed
- * 3. ORDERED: Events have sequence (version number)
- * 4. COMPLETE: Every change is recorded
- */
-
 export interface IEventDocument extends Document {
-  // Event identity
-  eventId: string;              // Unique ID for this event (UUID)
-  eventType: string;            // What happened: "GAME_STARTED", "GOAL_SCORED", etc.
+  eventId: string;
+  eventType: string;
   
-  // What entity does this event belong to?
-  aggregateId: string;          // Which game: "M1", "T1", "H1"
-  aggregateType: string;        // Type of entity: "GAME"
+  aggregateId: string;
+  aggregateType: string;
   
-  // Event ordering
-  version: number;              // Sequence number (1, 2, 3...) for this game
+  version: number;
   
-  // When did it happen?
-  timestamp: Date;              // When the event occurred in real world
+  timestamp: Date;
   
-  // What changed?
   payload: {
-    sport?: string;             // "SOCCER", "TENNIS", "HOCKEY"
-    team?: string;              // Which team: "home", "away", "team1", "team2"
-    player?: number;            // Which player (for tennis): 1 or 2
-    minute?: number;            // Game minute (for soccer)
-    period?: number;            // Period (for hockey)
-    
-    // Before and after (for changes)
-    previousState?: any;        // State before event
-    newState?: any;             // State after event
-    
-    // Original event data from API
+    sport?: string;
+    team?: string;
+    player?: number;
+    minute?: number;
+    period?: number;
+
+    previousState?: any;
+    newState?: any;
+
     originalEvent?: any;
   };
   
-  // Technical metadata
-  sourceApi?: string;           // Where it came from: "soccer-api", etc.
-  createdAt: Date;              // When saved to database
+  sourceApi?: string;
+  createdAt: Date;
 }
 
-/**
- * MongoDB Schema Definition
- */
 const EventSchema = new Schema<IEventDocument>({
   eventId: {
     type: String,
     required: true,
-    unique: true,               // No duplicate events
-    index: true                 // Fast lookups
+    unique: true,
+    index: true
   },
   
   eventType: {
     type: String,
     required: true,
-    index: true                 // Query by event type
+    index: true
   },
   
   aggregateId: {
     type: String,
     required: true,
-    index: true                 // Query by game ID
+    index: true
   },
   
   aggregateType: {
@@ -80,17 +57,17 @@ const EventSchema = new Schema<IEventDocument>({
   version: {
     type: Number,
     required: true,
-    min: 1                      // Versions start at 1
+    min: 1
   },
   
   timestamp: {
     type: Date,
     required: true,
-    index: true                 // Query by time
+    index: true
   },
   
   payload: {
-    type: Schema.Types.Mixed,   // Flexible structure (different per event type)
+    type: Schema.Types.Mixed,
     required: true
   },
   
@@ -104,19 +81,13 @@ const EventSchema = new Schema<IEventDocument>({
     index: true
   }
 }, {
-  collection: 'events',         // Collection name
-  timestamps: false             // We handle timestamps manually
+  collection: 'events',
+  timestamps: false
 });
 
-/**
- * COMPOUND INDEXES for performance
- * 
- * 1. Query all events for a game, in order
- * 2. Ensure no duplicate versions for same game
- */
 EventSchema.index(
   { aggregateId: 1, version: 1 },
-  { unique: true }              // Can't have two events with same version for same game
+  { unique: true }
 );
 
 EventSchema.index(
@@ -127,7 +98,4 @@ EventSchema.index(
   { eventType: 1, timestamp: -1 }
 );
 
-/**
- * Export the model
- */
 export const EventModel = mongoose.model<IEventDocument>('Event', EventSchema);

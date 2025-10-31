@@ -1,15 +1,3 @@
-/**
- * GAME RESPONSE DTO
- * 
- * Purpose: Standardized format for API responses
- * Pattern: Data Transfer Object (DTO)
- * 
- * Why DTO?
- * - Clean API responses (no internal DB fields like _id, __v)
- * - Consistent format across all endpoints
- * - Easy to version (can add fields without breaking clients)
- */
-
 export interface GameResponseDto {
   gameId: string;
   sport: string;

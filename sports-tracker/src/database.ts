@@ -3,12 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-/**
- * DATABASE CONNECTION
- * 
- * Connects to MongoDB and initializes schemas
- */
-
 export async function connectDatabase(): Promise<void> {
   try {
     const mongoUri = process.env.MONGODB_URI || 'mongodb://admin:password@localhost:27017/sports?authSource=admin';
@@ -27,9 +21,6 @@ export async function connectDatabase(): Promise<void> {
   }
 }
 
-/**
- * Disconnect from database
- */
 export async function disconnectDatabase(): Promise<void> {
   await mongoose.disconnect();
   console.log('👋 Disconnected from MongoDB');
